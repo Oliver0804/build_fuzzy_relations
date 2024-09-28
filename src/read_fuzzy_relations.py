@@ -37,7 +37,8 @@ with open(vocab_path, 'rb') as f:
 print(f"{TerminalColors.OKGREEN}詞彙映射已成功載入！{TerminalColors.ENDC}")
 
 # 遍歷模糊關係映射，打印部分詞彙及其模糊關係
-print(f"{TerminalColors.HEADER}展示前10個目標詞彙及其相關詞彙及隸屬度：{TerminalColors.ENDC}")
+print(f"{TerminalColors.HEADER}展示目標詞彙及其相關詞彙及隸屬度：{TerminalColors.ENDC}")
+
 def visualize_degree(degree, scale=20):
     """
     使用條形顯示隸屬度。
@@ -49,25 +50,32 @@ def visualize_degree(degree, scale=20):
     bar_length = int(degree * scale)
     return '█' * bar_length + '-' * (scale - bar_length)
 
-for target_idx, related_words in list(fuzzy_relations.items())[:10]:
-    target_word = idx2word[target_idx]
-    print(f"{TerminalColors.OKBLUE}目標詞彙：{target_word}{TerminalColors.ENDC}")
-    for related_idx, degree in related_words.items():
-        related_word = idx2word[related_idx]
-        degree_bar = visualize_degree(degree)
-        print(f"  {TerminalColors.OKCYAN}相關詞彙：{related_word}，隸屬度：{degree:.2f} {degree_bar}{TerminalColors.ENDC}")
-    print()  # 空行分隔每個詞彙的結果
+# 詢問使用者想要顯示多少個詞彙
+user_input = input(f"{TerminalColors.OKCYAN}請輸入要顯示的目標詞彙數量（不輸入表示全部）：{TerminalColors.ENDC}")
+
+# 如果使用者沒有輸入任何值，顯示全部詞彙
+if user_input.strip() == "":
+    num_words = len(fuzzy_relations)
+else:
+    num_words = int(user_input)
+
+# 限制輸入的值不要超過可用的詞彙數量
+num_words = min(num_words, len(fuzzy_relations))
 
 # 構建 NetworkX 圖形
 G = nx.Graph()
 
-# 遍歷模糊關係映射，將詞彙及其關係加入圖中
-for target_idx, related_words in list(fuzzy_relations.items())[:10]:  # 只展示前10個詞彙
+# 遍歷模糊關係映射，根據使用者的輸入顯示相應的詞彙數量
+for target_idx, related_words in list(fuzzy_relations.items())[:num_words]:
     target_word = idx2word[target_idx]
+    print(f"{TerminalColors.OKBLUE}目標詞彙：{target_word}{TerminalColors.ENDC}")
     G.add_node(target_word)  # 添加節點
     for related_idx, degree in related_words.items():
         related_word = idx2word[related_idx]
+        degree_bar = visualize_degree(degree)
+        print(f"  {TerminalColors.OKCYAN}相關詞彙：{related_word}，隸屬度：{degree:.2f} {degree_bar}{TerminalColors.ENDC}")
         G.add_edge(target_word, related_word, weight=degree)  # 添加邊，權重為隸屬度
+    print()  # 空行分隔每個詞彙的結果
 
 # 設定節點和邊的外觀
 pos = nx.spring_layout(G)  # 使用 spring 布局進行圖形排列
