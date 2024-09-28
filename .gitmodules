@@ -1,0 +1,6 @@
+[submodule "path/to/submodule"]
+	path = path/to/submodule
+	url = https://github.com/facebookresearch/fastText.git
+[submodule "fastText"]
+	path = fastText
+	url = https://github.com/facebookresearch/fastText.git
