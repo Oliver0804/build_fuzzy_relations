@@ -13,3 +13,7 @@ processed/
 embeddings/
 
 存放预训练的词嵌入模型，例如 cc.de.300.bin。
+
+```
+conda env create -f environment.yaml
+```
